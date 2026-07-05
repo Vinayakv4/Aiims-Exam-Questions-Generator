@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AI-powered AIIMS CRE 2026 Pharmacist Grade II Mock Examination — Predict and practice 2026 questions with Claude Sonnet AI via Replicate." />
+  <meta property="og:title" content="AIIMS CRE 2026 — AI Pharmacist Mock Exam" />
+  <meta property="og:description" content="Generate predicted AIIMS CRE 2026 Pharmacist exam questions using AI. Real exam interface with timer, negative marking & answer key." />
+  <title>AIIMS CRE 2026 — AI Pharmacist Exam Generator</title>
+  <link rel="stylesheet" href="styles.css?v=3" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+</head>
+<body>
+
+<!-- ── Ambient Background ── -->
+<div class="bg-gradient"></div>
+<canvas id="bg-canvas"></canvas>
+
+<!-- ── Morphing Blob ── -->
+<div class="blob-container" aria-hidden="true">
+  <svg class="blob" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="blobGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:0.9"/>
+        <stop offset="50%" style="stop-color:#6366f1;stop-opacity:0.6"/>
+        <stop offset="100%" style="stop-color:#22d3ee;stop-opacity:0.4"/>
+      </linearGradient>
+    </defs>
+    <path id="blob-path" fill="url(#blobGrad)">
+      <animate attributeName="d"
+        dur="12s"
+        repeatCount="indefinite"
+        values="
+          M200,80 C260,40 340,80 360,160 C380,240 340,320 260,350 C180,380 100,340 70,260 C40,180 60,100 120,70 C150,55 175,95 200,80Z;
+          M200,60 C270,50 360,100 370,180 C380,260 320,340 240,360 C160,380 80,330 60,250 C40,170 80,90 150,65 C170,58 185,65 200,60Z;
+          M200,90 C255,45 345,90 355,170 C365,250 310,330 230,355 C150,380 85,340 65,260 C45,180 75,100 135,72 C158,60 178,100 200,90Z;
+          M200,80 C260,40 340,80 360,160 C380,240 340,320 260,350 C180,380 100,340 70,260 C40,180 60,100 120,70 C150,55 175,95 200,80Z"
+        calcMode="spline"
+        keySplines="0.5 0 0.5 1; 0.5 0 0.5 1; 0.5 0 0.5 1"
+      />
+    </path>
+  </svg>
+</div>
+
+<!-- ── Toast Container ── -->
+<div class="toast-container" id="toast-container" role="alert" aria-live="polite"></div>
+
+<!-- ── Main App ── -->
+<div id="app">
+
+  <!-- ═══════════════════════════════════════════════
+       SCREEN 1: HERO
+  ═══════════════════════════════════════════════ -->
+  <section id="screen-hero" class="screen active" role="region" aria-label="Hero Section">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      AI-Powered · AIIMS CRE 2026 · Pharmacist Grade II
+    </div>
+
+    <h1 class="hero-title">
+      <span class="gradient-text">AIIMS CRE</span><br/>
+      Pharmacist Mock Exam
+    </h1>
+
+    <p class="hero-sub">
+      Generate <strong>predicted 2026 exam questions</strong> using Claude Sonnet AI.<br/>
+      Real AIIMS exam interface. Timer. Negative marking. Full answer key.
+    </p>
+
+    <div class="hero-cta-group">
+      <button id="btn-hero-start" class="btn btn-primary shine-hover" aria-label="Start generating exam">
+        <span>🚀</span> Start Exam Generator
+      </button>
+      <a href="https://replicate.com" target="_blank" rel="noopener" class="btn btn-ghost">
+        <span>🔑</span> Get Replicate API Key
+      </a>
+    </div>
+
+    <div class="hero-cards stagger">
+      <article class="glass-card hero-stat-card shine-hover" aria-label="200 Questions stat">
+        <span class="hero-stat-icon">📋</span>
+        <span class="hero-stat-value">200+</span>
+        <span class="hero-stat-label">AI Questions</span>
+      </article>
+      <article class="glass-card hero-stat-card shine-hover" aria-label="8 subjects covered">
+        <span class="hero-stat-icon">🧬</span>
+        <span class="hero-stat-value">8</span>
+        <span class="hero-stat-label">Subjects Covered</span>
+      </article>
+      <article class="glass-card hero-stat-card shine-hover" aria-label="2026 prediction">
+        <span class="hero-stat-icon">🔮</span>
+        <span class="hero-stat-value">2026</span>
+        <span class="hero-stat-label">Trend Predicted</span>
+      </article>
+      <article class="glass-card hero-stat-card shine-hover" aria-label="Real exam interface">
+        <span class="hero-stat-icon">🏥</span>
+        <span class="hero-stat-value">Real</span>
+        <span class="hero-stat-label">Exam Interface</span>
+      </article>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SCREEN 2: API CONFIG
+  ═══════════════════════════════════════════════ -->
+  <section id="screen-api" class="screen" aria-label="API Configuration">
+    <div class="glass-card api-card shine-hover" style="max-width:580px;">
+      <div class="api-icon">🤖</div>
+      <h2 class="api-title">Connect AI Model</h2>
+      <p class="api-desc">
+        Choose your AI provider and enter the API key. Your key is stored locally — never sent to any third-party server.
+      </p>
+
+      <!-- Model Selector Tabs -->
+      <div class="mode-tabs" role="tablist" aria-label="AI Model selection" style="margin-bottom:24px;">
+        <button class="mode-tab active" data-provider="gemini" role="tab" aria-selected="true" id="tab-gemini">✨ Gemini 3.1 Pro</button>
+        <button class="mode-tab" data-provider="replicate" role="tab" aria-selected="false" id="tab-replicate">🧠 Claude Sonnet</button>
+      </div>
+
+      <!-- Gemini Key Input -->
+      <div id="provider-gemini" class="provider-panel">
+        <div class="input-wrapper">
+          <span class="input-icon" aria-hidden="true">🔑</span>
+          <input
+            type="password"
+            id="gemini-key-input"
+            class="glass-input"
+            placeholder="AIza••••••••••••••••••••••••••••••"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Gemini API Key"
+          />
+          <button id="toggle-eye-gemini" class="input-eye" aria-label="Toggle key visibility" title="Show/hide key">👁️</button>
+        </div>
+        <div style="margin-bottom:16px;">
+          <label for="gemini-model-select" style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px;">Model</label>
+          <select id="gemini-model-select" class="glass-input" style="cursor:pointer;padding:10px 14px;">
+            <option value="gemini-3.5-flash" selected>⚡ Gemini 3.5 Flash (Free · Fast)</option>
+            <option value="gemini-3.1-pro-preview">🧠 Gemini 3.1 Pro (Best · Preview)</option>
+            <option value="gemini-3-flash-preview">💨 Gemini 3 Flash (Pro-level · Fast)</option>
+            <option value="gemini-3.1-flash-lite">💡 Gemini 3.1 Flash-Lite (Cheapest)</option>
+          </select>
+        </div>
+        <div class="api-info-box">
+          ✨ Get your free Gemini API key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Uses the <strong>Interactions API</strong> with Google Search grounding for accurate predictions. <strong>Free tier available!</strong>
+        </div>
+        <button id="btn-save-gemini" class="btn btn-primary btn-verify" aria-label="Save and verify Gemini key">
+          <span id="verify-icon-gemini">✓</span>
+          <span id="verify-text-gemini">Save & Verify Key</span>
+        </button>
+        <div class="api-status" id="api-status-gemini" aria-live="polite"></div>
+      </div>
+
+      <!-- Replicate Key Input -->
+      <div id="provider-replicate" class="provider-panel" style="display:none;">
+        <div class="input-wrapper">
+          <span class="input-icon" aria-hidden="true">🔐</span>
+          <input
+            type="password"
+            id="api-key-input"
+            class="glass-input"
+            placeholder="r8_••••••••••••••••••••••••••••••••••"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Replicate API Key"
+          />
+          <button id="toggle-eye" class="input-eye" aria-label="Toggle key visibility" title="Show/hide key">👁️</button>
+        </div>
+        <div class="api-info-box">
+          💡 Get your API key at <a href="https://replicate.com/account/api-tokens" target="_blank" rel="noopener">replicate.com/account/api-tokens</a>. Uses <strong>Claude Sonnet 4.6</strong> via Replicate (~$0.015 per exam paper).
+        </div>
+        <button id="btn-save-api" class="btn btn-primary btn-verify" aria-label="Save and verify API key">
+          <span id="verify-icon">✓</span>
+          <span id="verify-text">Save & Verify Key</span>
+        </button>
+        <div class="api-status" id="api-status" aria-live="polite"></div>
+      </div>
+
+      <div style="margin-top:24px; display:flex; justify-content:center;">
+        <button id="btn-back-hero" class="btn btn-ghost" aria-label="Back to home">← Back</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SCREEN 3: EXAM CONFIG
+  ═══════════════════════════════════════════════ -->
+  <section id="screen-config" class="screen" aria-label="Exam Configuration">
+    <div class="config-header">
+      <div class="section-label">Configure Your Paper</div>
+      <h2 class="config-title">Build Your <span class="gradient-text">Mock Exam</span></h2>
+      <p style="color:var(--text-secondary);font-size:14px;max-width:500px;margin:0 auto;">
+        Select subjects, question count, and difficulty. AI will predict the most likely 2026 AIIMS CRE questions.
+      </p>
+    </div>
+
+    <div class="config-body">
+      <!-- Mode Selector -->
+      <div class="glass-panel config-section" style="padding:20px 24px;">
+        <div class="section-label">Exam Mode</div>
+        <div class="mode-tabs" role="tablist" aria-label="Exam modes">
+          <button class="mode-tab active" data-mode="full" role="tab" aria-selected="true" id="tab-full">📝 Full Paper</button>
+          <button class="mode-tab" data-mode="topic" role="tab" aria-selected="false" id="tab-topic">🎯 Topic-wise</button>
+          <button class="mode-tab" data-mode="quick" role="tab" aria-selected="false" id="tab-quick">⚡ Quick Quiz</button>
+        </div>
+      </div>
+
+      <!-- Subject Selection -->
+      <div class="glass-card config-section stagger" aria-label="Subject selection">
+        <div class="config-section-title">
+          🧬 Select Subjects
+          <button id="btn-select-all" class="btn btn-ghost" style="padding:6px 14px;font-size:12px;margin-left:auto;" aria-label="Select all subjects">Select All</button>
+        </div>
+        <div class="subject-grid" id="subject-grid" role="group" aria-label="Subject checkboxes">
+          <!-- dynamically filled by JS -->
+        </div>
+      </div>
+
+      <!-- Question Count -->
+      <div class="glass-card config-section" aria-label="Question count">
+        <div class="config-section-title">📊 Number of Questions</div>
+        <div class="slider-row">
+          <div class="q-count-display" id="q-count-display" aria-live="polite">100</div>
+          <input type="range" id="q-count-slider" class="glass-range" min="25" max="200" step="25" value="100" aria-label="Number of questions" />
+        </div>
+        <div style="display:flex;gap:10px;margin-top:12px;">
+          <button class="diff-pill" data-qcount="25" aria-label="25 questions">25 Q</button>
+          <button class="diff-pill" data-qcount="50" aria-label="50 questions">50 Q</button>
+          <button class="diff-pill" data-qcount="100" aria-label="100 questions">100 Q</button>
+          <button class="diff-pill" data-qcount="200" aria-label="200 questions">200 Q</button>
+        </div>
+      </div>
+
+      <!-- Difficulty -->
+      <div class="glass-card config-section" aria-label="Difficulty selection">
+        <div class="config-section-title">🎯 Difficulty Level</div>
+        <div class="diff-pills" role="group" aria-label="Difficulty options">
+          <button class="diff-pill" data-diff="Easy" aria-label="Easy difficulty">🟢 Easy</button>
+          <button class="diff-pill active-medium" data-diff="Mixed" aria-label="Mixed difficulty">🟡 Mixed (Recommended)</button>
+          <button class="diff-pill" data-diff="Hard" aria-label="Hard difficulty">🔴 Hard</button>
+        </div>
+        <p style="color:var(--text-muted);font-size:12px;margin-top:12px;">Mixed mirrors real AIIMS CRE pattern: ~30% easy, 50% medium, 20% hard.</p>
+      </div>
+
+      <!-- Marking Scheme Info -->
+      <div class="glass-card config-section" style="padding:20px 24px;" aria-label="Marking scheme">
+        <div class="config-section-title" style="margin-bottom:8px;">📐 Marking Scheme</div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:14px;">
+            <span style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:6px;padding:4px 12px;color:#10b981;font-weight:700;">+1</span>
+            <span style="color:var(--text-secondary);">Correct Answer</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:14px;">
+            <span style="background:rgba(244,63,94,0.15);border:1px solid rgba(244,63,94,0.3);border-radius:6px;padding:4px 12px;color:#f43f5e;font-weight:700;">−⅓</span>
+            <span style="color:var(--text-secondary);">Wrong Answer</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:14px;">
+            <span style="background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);border-radius:6px;padding:4px 12px;color:var(--text-muted);font-weight:700;">0</span>
+            <span style="color:var(--text-secondary);">Not Attempted</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Generate CTA -->
+      <div class="generate-cta">
+        <button id="btn-generate" class="btn btn-primary generate-btn shine-hover" aria-label="Generate AI question paper">
+          <span>🧠</span> Generate AI Question Paper
+        </button>
+        <p style="color:var(--text-muted);font-size:12px;text-align:center;">
+          AI will predict likely 2026 AIIMS CRE Pharmacist questions based on syllabus trends
+        </p>
+        <button id="btn-back-api" class="btn btn-ghost" style="margin-top:4px;" aria-label="Back to API config">← Change API Key</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SCREEN 4: LOADING
+  ═══════════════════════════════════════════════ -->
+  <section id="screen-loading" class="screen" aria-label="Generating questions" aria-live="polite">
+    <div class="glass-card loading-card">
+      <div class="brain-anim" aria-hidden="true">
+        <div class="brain-ring"></div>
+        <div class="brain-ring"></div>
+        <div class="brain-ring"></div>
+        <div class="brain-core">🧠</div>
+      </div>
+
+      <h2 class="loading-title" id="loading-title">Predicting 2026 Questions…</h2>
+      <p class="loading-sub" id="loading-sub">Claude Sonnet AI is analyzing AIIMS CRE syllabus trends and generating exam-pattern questions</p>
+
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar" style="width:5%;"></div>
+      </div>
+
+      <div id="loading-status" style="font-size:12px;color:var(--text-muted);margin-bottom:16px;text-align:center;" aria-live="polite">
+        Connecting to Replicate API…
+      </div>
+
+      <div class="stream-output" id="stream-output" aria-label="AI output stream" aria-live="polite">
+        Initializing Claude Sonnet 4.6…
+      </div>
+
+      <div class="skeleton-grid" aria-hidden="true">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+
+      <div style="margin-top:20px;display:flex;justify-content:center;">
+        <button id="btn-cancel-generation" class="btn btn-ghost" aria-label="Cancel generation">✕ Cancel</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SCREEN 5: EXAM INTERFACE
+  ═══════════════════════════════════════════════ -->
+  <section id="screen-exam" class="screen" role="main" aria-label="AIIMS Exam Interface">
+    <!-- Top Bar -->
+    <header class="exam-topbar">
+      <div class="topbar-brand">
+        <div class="aiims-logo-badge" aria-label="AIIMS Logo">AIIMS</div>
+        <div>
+          <div class="topbar-title">CRE 2026 — <span>Pharmacist Grade II</span></div>
+          <div style="font-size:11px;color:var(--text-muted);">AI-Predicted Question Paper</div>
+        </div>
+      </div>
+
+      <div class="topbar-right" style="display:flex;align-items:center;gap:16px;">
+        <div class="marking-info" aria-label="Marking scheme">
+          <span><span class="mark-pos">+1</span> Correct</span>
+          <span><span class="mark-neg">−⅓</span> Wrong</span>
+        </div>
+
+        <div class="exam-timer-wrap" aria-label="Exam timer" role="timer">
+          <svg class="timer-ring-svg" width="36" height="36" viewBox="0 0 36 36" aria-hidden="true">
+            <circle class="timer-track" cx="18" cy="18" r="14"/>
+            <circle class="timer-fill" id="timer-ring" cx="18" cy="18" r="14"/>
+          </svg>
+          <span class="timer-text" id="timer-display">02:00:00</span>
+        </div>
+        <button id="btn-submit-exam" class="btn btn-gold" style="padding:10px 20px;font-size:13px;" aria-label="Submit exam">Submit Exam</button>
+      </div>
+    </header>
+
+    <!-- Mobile Palette Toggle -->
+    <button id="mobile-palette-btn" class="mobile-palette-toggle" aria-label="Toggle question palette">📋</button>
+    <div id="palette-overlay" class="palette-overlay"></div>
+
+    <!-- Exam Body -->
+    <div class="exam-body">
+      <!-- Question Palette -->
+      <aside class="palette-panel" aria-label="Question palette">
+        <div class="palette-header">
+          <div class="palette-header-title">Question Palette</div>
+          <div class="palette-legend">
+            <div class="legend-item"><div class="legend-dot answered"></div> Answered</div>
+            <div class="legend-item"><div class="legend-dot marked"></div> Marked for Review</div>
+            <div class="legend-item"><div class="legend-dot current"></div> Current</div>
+            <div class="legend-item"><div class="legend-dot unanswered"></div> Not Visited</div>
+          </div>
+        </div>
+        <div class="palette-grid" id="palette-grid" role="navigation" aria-label="Question numbers"></div>
+        <div class="palette-footer">
+          <div class="palette-stats">
+            <div class="pstat">
+              <div class="pstat-val" id="stat-answered" style="color:var(--emerald)">0</div>
+              <div class="pstat-label">Answered</div>
+            </div>
+            <div class="pstat">
+              <div class="pstat-val" id="stat-skipped" style="color:var(--gold)">0</div>
+              <div class="pstat-label">Skipped</div>
+            </div>
+          </div>
+          <button id="btn-submit-exam-2" class="btn btn-gold" style="width:100%;justify-content:center;padding:12px;" aria-label="Submit exam from palette">🏁 Submit Exam</button>
+        </div>
+      </aside>
+
+      <!-- Main Question Panel -->
+      <main class="exam-main">
+        <div class="exam-main-scroll">
+          <!-- Question Header -->
+          <div class="question-header">
+            <div class="q-meta">
+              <div class="q-number-badge" id="q-number-badge">Q. 1</div>
+              <span class="badge badge-info" id="q-subject-badge">Pharmacology</span>
+              <span class="badge badge-warning" id="q-difficulty-badge">Medium</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);" id="q-progress-text">1 of 100</div>
+          </div>
+
+          <!-- Question Text -->
+          <div class="glass-card question-card shine-hover">
+            <p class="question-text" id="question-text">Loading question…</p>
+          </div>
+
+          <!-- Options -->
+          <div class="options-list" id="options-list" role="radiogroup" aria-label="Answer options">
+            <!-- Dynamically rendered -->
+          </div>
+
+          <!-- Topic Prediction Tag -->
+          <div id="ai-prediction-tag" style="margin-bottom:24px;display:none;">
+            <span class="ak-prediction-badge">🔮 High 2026 Prediction Probability</span>
+          </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="exam-actions">
+          <div class="exam-actions-left">
+            <button id="btn-prev" class="btn btn-ghost" style="padding:10px 18px;font-size:13px;" aria-label="Previous question">← Prev</button>
+            <button id="btn-clear" class="btn btn-ghost" style="padding:10px 18px;font-size:13px;" aria-label="Clear response">🗑️ Clear</button>
+            <button id="btn-mark-review" class="btn btn-ghost" style="padding:10px 18px;font-size:13px;" aria-label="Mark for review">🏷️ Mark</button>
+          </div>
+          <div class="exam-actions-right">
+            <button id="btn-next" class="btn btn-primary" style="padding:10px 20px;font-size:13px;" aria-label="Save and go to next question">Save & Next →</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SCREEN 6: RESULTS
+  ═══════════════════════════════════════════════ -->
+  <section id="screen-results" class="screen" role="region" aria-label="Exam Results">
+    <div class="results-header">
+      <div class="section-label">Exam Complete</div>
+      <h2 class="config-title" id="results-title">Your Score</h2>
+    </div>
+
+    <div class="results-grid" style="max-width:1000px;width:100%;">
+      <!-- Score Card -->
+      <div class="glass-card" style="padding:40px;text-align:center;">
+        <div class="section-label" style="margin-bottom:20px;">Overall Performance</div>
+        <div class="score-ring-wrap">
+          <svg class="score-ring-svg" width="180" height="180" viewBox="0 0 180 180" aria-hidden="true">
+            <circle class="score-ring-track" cx="90" cy="90" r="80"/>
+            <circle class="score-ring-fill" id="score-ring" cx="90" cy="90" r="80"/>
+          </svg>
+          <div class="score-center-text">
+            <span class="score-pct" id="score-pct-display">—</span>
+            <span class="score-label-small">Score %</span>
+          </div>
+        </div>
+
+        <div class="stats-row" style="margin-top:24px;">
+          <div class="stat-box correct">
+            <span class="stat-box-val" id="res-correct">0</span>
+            <span class="stat-box-lbl">✅ Correct</span>
+          </div>
+          <div class="stat-box wrong">
+            <span class="stat-box-val" id="res-wrong">0</span>
+            <span class="stat-box-lbl">❌ Wrong</span>
+          </div>
+          <div class="stat-box skipped">
+            <span class="stat-box-val" id="res-skipped">0</span>
+            <span class="stat-box-lbl">⬜ Skipped</span>
+          </div>
+        </div>
+
+        <div style="background:var(--glass-1);border-radius:var(--r-md);padding:16px;margin-top:16px;text-align:left;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;">
+            <span style="color:var(--text-secondary);">Raw Score</span>
+            <span id="res-raw" style="font-weight:700;">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;">
+            <span style="color:var(--text-secondary);">Marks Lost (−⅓)</span>
+            <span id="res-penalty" style="color:var(--rose);font-weight:700;">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;border-top:1px solid var(--glass-border);padding-top:8px;">
+            <span>Final Score</span>
+            <span id="res-final" style="color:var(--violet-bright);">—</span>
+          </div>
+        </div>
+
+        <div class="badge" id="result-verdict" style="margin:20px auto 0;font-size:13px;padding:8px 20px;"></div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:24px;">
+          <button id="btn-new-paper" class="btn btn-primary" style="justify-content:center;" aria-label="Generate new paper">🔄 Generate New Paper</button>
+          <button id="btn-retry" class="btn btn-ghost" style="justify-content:center;" aria-label="Retry same paper">↩️ Retry Same Paper</button>
+          <button id="btn-print" class="btn btn-ghost" style="justify-content:center;" aria-label="Download full paper with answers as PDF">📄 Download Full Paper PDF</button>
+        </div>
+      </div>
+
+      <!-- Section Breakdown -->
+      <div class="glass-card" style="padding:32px;">
+        <div class="section-label" style="margin-bottom:20px;">Subject-wise Breakdown</div>
+        <div class="section-bars" id="section-bars"></div>
+      </div>
+
+    </div>
+  </section>
+
+</div><!-- /#app -->
+
+<!-- ── Submit Confirm Modal ── -->
+<div class="modal-overlay" id="submit-modal" style="display:none;" role="dialog" aria-modal="true" aria-label="Submit exam confirmation">
+  <div class="glass-card modal-card">
+    <span class="modal-icon" aria-hidden="true">⚠️</span>
+    <h3 class="modal-title">Submit Exam?</h3>
+    <p class="modal-desc" id="modal-desc">You have answered <strong id="modal-answered">0</strong> out of <strong id="modal-total">0</strong> questions. <span id="modal-skipped-msg"></span>Are you sure you want to submit?</p>
+    <div class="modal-actions">
+      <button id="btn-confirm-submit" class="btn btn-gold" aria-label="Confirm submit">🏁 Yes, Submit</button>
+      <button id="btn-cancel-submit" class="btn btn-ghost" aria-label="Cancel and continue exam">Continue Exam</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js?v=9"></script>
+</body>
+</html>
