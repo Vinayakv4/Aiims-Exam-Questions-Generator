@@ -16,7 +16,8 @@ const fs    = require('fs');
 const path  = require('path');
 const { execSync } = require('child_process');
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 const DIR  = __dirname;
 
 const MIME = {
@@ -231,8 +232,8 @@ server.on('error', err => {
   process.exit(1);
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  const url = `http://localhost:${PORT}`;
+server.listen(PORT, HOST, () => {
+  const url = `http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}`;
   console.log(`
 ╔══════════════════════════════════════════════════════╗
 ║   🏥  AIIMS CRE 2026 AI Exam Generator               ║
@@ -243,15 +244,17 @@ server.listen(PORT, '127.0.0.1', () => {
 ╚══════════════════════════════════════════════════════╝
 `);
 
-  // Auto-open browser on Mac/Linux/Windows
-  try {
-    const platform = process.platform;
-    if      (platform === 'darwin') execSync(`open "${url}"`);
-    else if (platform === 'win32')  execSync(`start "${url}"`);
-    else                            execSync(`xdg-open "${url}"`);
-    console.log('  🌐  Browser opened automatically.\n');
-  } catch(_) {
-    console.log(`  👆  Open this in your browser: ${url}\n`);
+  // Auto-open browser locally only — skip on cloud hosts (no display, no env var to detect it reliably otherwise)
+  if (!process.env.RENDER && !process.env.PORT) {
+    try {
+      const platform = process.platform;
+      if      (platform === 'darwin') execSync(`open "${url}"`);
+      else if (platform === 'win32')  execSync(`start "${url}"`);
+      else                            execSync(`xdg-open "${url}"`);
+      console.log('  🌐  Browser opened automatically.\n');
+    } catch(_) {
+      console.log(`  👆  Open this in your browser: ${url}\n`);
+    }
   }
 
   console.log('  Press Ctrl+C to stop.\n');
